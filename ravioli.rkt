@@ -68,6 +68,10 @@ Then design the four functions described above. Follow the Design Recipe.
 ; Takes in ingredient and returns dish if given a filling
 ; If given a ingredient of type sauce or something else
 ; it will return "Not a filling"
+(check-expect (al-pomodoro ricotta) DISH1)
+(check-expect (al-pomodoro butternut-squash) DISH4)
+(check-expect (al-pomodoro lobster) DISH7)
+(check-expect (al-pomodoro tomato) "Not a filling")
 (define (al-pomodoro filling)
   (cond
     [(string=? (ingredient-type filling) "filling")
