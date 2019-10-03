@@ -17,10 +17,12 @@ define these functions:
   filling with cream sauce, and given `#false` it returns lobster
   filling with wild mushroom sauce.
 
+; Pass a dish and return a "vegan" or "not vegan" 
 - `is-vegan?` takes any combination and returns whether that combination
   is vegan. Combinations that involve ricotta filling, lobster filling,
   or cream sauce are not vegan; all others are.
 
+; Pass a list and return a list
 - `only-vegan` takes a list of ravioli dishes and returns a list that
   contains only the vegan dishes from the original list.
 
@@ -30,6 +32,47 @@ represent any possible ravioli combination.
 
 Then design the four functions described above. Follow the Design Recipe.
 |#
+
+; Struct named "ingredient" that takes in a String String String
+; for the name of the ingredient, the type (filling or sauce)
+; and if it is "vegan" or "not vegan"
+(define-struct ingredient [name type veganity])
+; Fillings
+(define ricotta (make-ingredient "ricotta" "filling" "not vegan"))
+(define butternut-squash (make-ingredient "butternut-squash" "filling" "vegan"))
+(define lobster (make-ingredient "lobster" "filling" "not vegan"))
+; Sauces
+(define tomato (make-ingredient "tomato" "sauce" "vegan"))
+(define cream (make-ingredient "cream" "sauce" "not vegan"))
+(define wild-mushroom (make-ingredient "wild-mushroom" "sauce" "vegan"))
+
+; Struct named "dish" that takes in an ingredient ingredient
+; for filling and sauce
+(define-struct dish [filling sauce])
+; Enunmerations - 9 distinct possibilities
+; 3 combinations using ricotta
+(define DISH1 (make-dish ricotta tomato))
+(define DISH2 (make-dish ricotta cream))
+(define DISH3 (make-dish ricotta wild-mushroom))
+; 3 combinations using butternut squash
+(define DISH4 (make-dish butternut-squash tomato))
+(define DISH5 (make-dish butternut-squash cream))
+(define DISH6 (make-dish butternut-squash wild-mushroom))
+; 3 combinations using lobster
+(define DISH7 (make-dish lobster tomato))
+(define DISH8 (make-dish lobster cream))
+(define DISH9 (make-dish lobster wild-mushroom))
+
+
+; al-pomodoro
+; Takes in ingredient and returns dish if given a filling
+; If given a ingredient of type sauce or something else
+; it will return "Not a filling"
+(define (al-pomodoro filling)
+  (cond
+    [(string=? (ingredient-type filling) "filling")
+     (make-dish filling tomato)]
+    [else "Not a filling"]))
 
 ;; The coverage checker doesn’t like empty (comment-only) files. You can
 ;; delete this test once you put something else in the file.
