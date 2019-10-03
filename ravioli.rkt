@@ -10,17 +10,9 @@ How could you represent a ravioli filling/sauce combination as data?
 In particular, consider how your representation would allow you to
 define these functions:
 
-- `al-pomodoro` takes any filling and returns the combination of that
-  same filling with tomato sauce.
-
 - `choose` takes a Boolean; given `#true` it returns butternut squash
   filling with cream sauce, and given `#false` it returns lobster
   filling with wild mushroom sauce.
-
-; Pass a dish and return a "vegan" or "not vegan" 
-- `is-vegan?` takes any combination and returns whether that combination
-  is vegan. Combinations that involve ricotta filling, lobster filling,
-  or cream sauce are not vegan; all others are.
 
 ; Pass a list and return a list
 - `only-vegan` takes a list of ravioli dishes and returns a list that
@@ -38,12 +30,12 @@ Then design the four functions described above. Follow the Design Recipe.
 ; and if it is "vegan" or "not vegan"
 (define-struct ingredient [name type veganity])
 ; Fillings
-(define ricotta (make-ingredient "ricotta" "filling" "not vegan"))
+(define ricotta (make-ingredient "ricotta" "filling" "not-vegan"))
 (define butternut-squash (make-ingredient "butternut-squash" "filling" "vegan"))
-(define lobster (make-ingredient "lobster" "filling" "not vegan"))
+(define lobster (make-ingredient "lobster" "filling" "not-vegan"))
 ; Sauces
 (define tomato (make-ingredient "tomato" "sauce" "vegan"))
-(define cream (make-ingredient "cream" "sauce" "not vegan"))
+(define cream (make-ingredient "cream" "sauce" "not-vegan"))
 (define wild-mushroom (make-ingredient "wild-mushroom" "sauce" "vegan"))
 
 ; Struct named "dish" that takes in an ingredient ingredient
@@ -64,7 +56,9 @@ Then design the four functions described above. Follow the Design Recipe.
 (define DISH9 (make-dish lobster wild-mushroom))
 
 
-; al-pomodoro
+; `al-pomodoro` takes any filling and returns the combination of that
+;  same filling with tomato sauce.
+
 ; Takes in ingredient and returns dish if given a filling
 ; If given a ingredient of type sauce or something else
 ; it will return "Not a filling"
@@ -78,6 +72,24 @@ Then design the four functions described above. Follow the Design Recipe.
      (make-dish filling tomato)]
     [else "Not a filling"]))
 
-;; The coverage checker doesn’t like empty (comment-only) files. You can
-;; delete this test once you put something else in the file.
-(check-expect (add1 2) 3)
+
+; Pass a dish and return a "vegan" or "not vegan" 
+; `is-vegan?` takes any combination and returns whether that combination
+;  is vegan. Combinations that involve ricotta filling, lobster filling,
+;  or cream sauce are not vegan; all others are.
+(check-expect (is-vegan DISH1) "IS NOT VEGAN")
+(check-expect (is-vegan DISH3) "IS NOT VEGAN")
+(check-expect (is-vegan DISH4) "IS VEGAN")
+(check-expect (is-vegan DISH5) "IS NOT VEGAN")
+(check-expect (is-vegan DISH8) "IS NOT VEGAN")
+(define (is-vegan dish)
+  (cond
+    [(and (string=? (ingredient-veganity (dish-filling dish)) "vegan")
+          (string=? (ingredient-veganity (dish-sauce dish)) "vegan")) "IS VEGAN"]
+    [else "IS NOT VEGAN"]))
+
+
+
+
+
+
