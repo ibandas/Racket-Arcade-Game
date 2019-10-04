@@ -16,8 +16,10 @@
 
 ; contains-telephone : [List-of String] -> Boolean
 ; Determines whether `lst` contains the string "telephone".
+(check-expect (contains-telephone (list "hello" "world" "telephone")) #true)
+(check-expect (contains-telephone (list "hello" "world" "email")) #false)
 (define (contains-telephone lst)
-  ...)
+  (member "telephone" lst))
 
 
 ; shortest : [NEList-of String] -> String
