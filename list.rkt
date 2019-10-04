@@ -64,6 +64,7 @@
 
 ; sum : [List-of Number] -> Number
 ; Calculates the sum
+; Strategy : Function Composition
 (define (sum lst)
   (cond
   [(empty? (rest lst)) (first lst)]
