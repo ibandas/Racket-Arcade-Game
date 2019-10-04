@@ -6,9 +6,13 @@
 
 ; squares : [List-of Number] -> [List-of Number]
 ; Squares each number in the list, producing a new list.
+(check-expect (squares '()) '())
+(check-expect (squares (list 10 0 20)) (list 100 0 400))
+(check-expect (squares (list 1 2 3 4 5)) (list 1 4 9 16 25))
 (define (squares l)
-  ...)
-
+  (cond
+    [(empty? l) '()]
+    [else (cons (* (first l) (first l)) (squares (rest l)))]))
 
 ; contains-telephone : [List-of String] -> Boolean
 ; Determines whether `lst` contains the string "telephone".
