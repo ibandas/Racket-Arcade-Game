@@ -24,10 +24,23 @@
 
 ; shortest : [NEList-of String] -> String
 ; Finds the shortest string in `lst`.
-;
+; Recursively goes through the function, compares side by side elements,
+; removes the smaller string until there is one element,
+; and finally extracts the only item left in the list
+; within the empty condition
 ; Hint: https://htdp.org/2019-02-24/part_two.html#%28part._sec~3alists~3ane%29
+(check-expect (shortest (list "hello")) "hello")
+(check-expect (shortest (list "mars" "hello")) "mars")
+(check-expect (shortest (list "hello" "mars")) "mars")
 (define (shortest lst)
-  ...)
+  (cond
+    [(empty? (rest lst)) (first lst)]
+    [( < (string-length (first lst))
+         (string-length (second lst)))
+     (shortest (remove (second lst) lst))]
+    [( > (string-length (first lst))
+         (string-length (second lst)))
+     (shortest (remove (first lst) lst))]))
 
 
 ; mean : [List-of Number] -> Number
