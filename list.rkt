@@ -30,18 +30,25 @@
 ; within the empty condition
 ; Hint: https://htdp.org/2019-02-24/part_two.html#%28part._sec~3alists~3ane%29
 (check-expect (shortest (list "hello")) "hello")
-(check-expect (shortest (list "mars" "hello")) "mars")
-(check-expect (shortest (list "hello" "mars")) "mars")
+(check-expect (shortest (list "saturn" "hello")) "hello")
+(check-expect (shortest (list "mars" "neptune")) "mars")
+(check-expect (shortest (list "mars" "saturn" "neptune")) "mars")
 (define (shortest lst)
   (cond
     [(empty? (rest lst)) (first lst)]
-    [( < (string-length (first lst))
-         (string-length (second lst)))
-     (shortest (remove (second lst) lst))]
-    [( > (string-length (first lst))
-         (string-length (second lst)))
-     (shortest (remove (first lst) lst))]))
+    [else (shortest (remove (compare-strings (first lst) (second lst)) lst))]))
 
+; Compares two strings and returns the longest one
+; Should not pass in two empty strings
+(check-expect (compare-strings "mars" "saturn") "saturn")
+(check-expect (compare-strings "saturn" "neptune") "neptune")
+; Strategy : Function Composition
+(define (compare-strings s1 s2)
+  (cond
+    [( < (string-length s1)
+         (string-length s2)) s2]
+    [( > (string-length s1)
+         (string-length s2)) s1]))
 
 ; mean : [List-of Number] -> Number
 ; Computes the average of the elements of `lst`.
