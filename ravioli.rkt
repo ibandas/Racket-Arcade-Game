@@ -10,14 +10,6 @@ How could you represent a ravioli filling/sauce combination as data?
 In particular, consider how your representation would allow you to
 define these functions:
 
-- `choose` takes a Boolean; given `#true` it returns butternut squash
-  filling with cream sauce, and given `#false` it returns lobster
-  filling with wild mushroom sauce.
-
-; Pass a list and return a list
-- `only-vegan` takes a list of ravioli dishes and returns a list that
-  contains only the vegan dishes from the original list.
-
 
 Design a data-type to represent ravioli dishes that allows you to
 represent any possible ravioli combination.
@@ -77,19 +69,41 @@ Then design the four functions described above. Follow the Design Recipe.
 ; `is-vegan?` takes any combination and returns whether that combination
 ;  is vegan. Combinations that involve ricotta filling, lobster filling,
 ;  or cream sauce are not vegan; all others are.
-(check-expect (is-vegan DISH1) "IS NOT VEGAN")
-(check-expect (is-vegan DISH3) "IS NOT VEGAN")
-(check-expect (is-vegan DISH4) "IS VEGAN")
-(check-expect (is-vegan DISH5) "IS NOT VEGAN")
-(check-expect (is-vegan DISH8) "IS NOT VEGAN")
-(define (is-vegan dish)
+(check-expect (is-vegan? DISH1) "IS NOT VEGAN")
+(check-expect (is-vegan? DISH3) "IS NOT VEGAN")
+(check-expect (is-vegan? DISH4) "IS VEGAN")
+(check-expect (is-vegan? DISH5) "IS NOT VEGAN")
+(check-expect (is-vegan? DISH8) "IS NOT VEGAN")
+; Possibly change else so it doesn't take a non-dish
+(define (is-vegan? dish)
   (cond
     [(and (string=? (ingredient-veganity (dish-filling dish)) "vegan")
           (string=? (ingredient-veganity (dish-sauce dish)) "vegan")) "IS VEGAN"]
     [else "IS NOT VEGAN"]))
 
 
+; `choose` takes a Boolean; given `#true` it returns butternut squash
+;  filling with cream sauce, and given `#false` it returns lobster
+;  filling with wild mushroom sauce.
+(check-expect (choose #true) DISH5)
+(check-expect (choose #false) DISH9)
+(check-expect (choose "hello") "Not given a boolean")
+(define (choose dish)
+  (cond
+    [ (equal? #true dish) DISH5]
+    [ (equal? #false dish) DISH9]
+    [else "Not given a boolean"]))
 
-
-
+; Pass a list and return a list
+; `only-vegan` takes a list of ravioli dishes and returns a list that
+; contains only the vegan dishes from the original list.
+(define list-of-dishes (list DISH1 DISH2 DISH3 DISH4 DISH5 DISH6 DISH7 DISH8 DISH9))
+(check-expect (only-vegan list-of-dishes) (list DISH4 DISH6))
+(check-expect (only-vegan '()) '())
+(define (only-vegan dishes)
+  (cond
+    [(empty? dishes) '()]
+    [else   (if (string=? "IS VEGAN" (is-vegan? (first dishes)))
+                (cons (first dishes) (only-vegan (rest dishes)))
+                (only-vegan (rest dishes)))]))
 
