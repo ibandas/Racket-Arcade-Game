@@ -53,5 +53,25 @@
 ; mean : [List-of Number] -> Number
 ; Computes the average of the elements of `lst`.
 ; Returns 0 if `lst` is empty.
+(check-expect (mean (list)) 0)
+(check-expect (mean (list 1 2 3)) 2)
+(check-expect (mean (list 2 4 6 8 10)) 6)
+(check-expect (mean (list 3 7 23 52 70)) 31)
 (define (mean lst)
-  ...)
+  (cond
+  [(empty? lst) 0]
+  [else (/ (sum lst) (length lst))]))
+
+; sum : [List-of Number] -> Number
+; Calculates the sum
+(define (sum lst)
+  (cond
+  [(empty? (rest lst)) (first lst)]
+  [else (+ (first lst) (sum (rest lst)))]))
+
+
+
+
+
+
+  
