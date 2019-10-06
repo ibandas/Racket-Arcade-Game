@@ -264,25 +264,35 @@ increasing *downward*.
 ;
 
 
-; Function to move the faller downward on the y-axis
+; Recursive function to move the faller downward on the y-axis
 ; "Downward" means increasing the value of the y-coordinate
+; If the list is empty, it returns empty
+; Else if the faller is at the bottom of the screen
+; It is removed from the new list being created
+; Thus being removed from the world
+;------
+; TODO: Add points to user score if it touches paddle
+; NOTE: Will probably make that another function
+;------
+; Else the faller has one pixel added to the y value
+; To make it descend
 ; descend : [List-of-Posns] -> [List of Posns]
 (check-expect (descend '()) '())
 (check-expect (descend (list (make-posn 1 1))) (list (make-posn 1 2)))
+(check-expect (descend (list (make-posn 0 WORLD-HEIGHT) (make-posn 100 0)))
+              (list (make-posn 100 1)))
 (check-expect (descend (list (make-posn 100 100) (make-posn 100 110)
                              (make-posn 100 120) (make-posn 100 130)))
-                       (list (make-posn 100 101) (make-posn 100 111)
-                             (make-posn 100 121) (make-posn 100 131)))
+              (list (make-posn 100 101) (make-posn 100 111)
+                    (make-posn 100 121) (make-posn 100 131)))
 (define (descend fallers)
   (cond
     [(empty? fallers) '()]
-    [else (cons (make-posn (posn-x (first fallers))
+    [else (if (= WORLD-HEIGHT (posn-y (first fallers)))
+              (descend (rest fallers))
+              (cons (make-posn (posn-x (first fallers))
                            (add1 (posn-y (first fallers))))
-                (descend (rest fallers)))]))
-
-; Increment the position of y value by 1 pixel
-;(define (increment y)
-;  (+ 1 (posn-y y)))
+                (descend (rest fallers))))]))
 
 ;; In your `tick` function, you need to
 ;; *sometimes* add a faller to the list of
