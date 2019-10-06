@@ -93,6 +93,9 @@ bottom or if it has hit the paddle.
 ; A Direction is one of:
 ; - "left"
 ; - "right"
+; For now: Boolean for left and right
+(define-struct direction [left right])
+
 
 ; A List-of-Posn is one of:
 ; - '()
@@ -130,6 +133,7 @@ bottom or if it has hit the paddle.
 (define WORLD-HEIGHT 300)  ; window height
 (define MAX-FALLERS 20)    ; maximum faller count
 (define INV-P-FALLER 25)   ; inverse of per-tick probability of new faller
+(define BACKGROUND (empty-scene WORLD-WIDTH WORLD-HEIGHT))
 
 
 #|
@@ -171,10 +175,12 @@ added will be included in the commit.
 
 |#
 
-(define FALLER-IMAGE empty-image)  ; <= fix this
+(define FALLER-IMAGE (circle 3 "solid" "red"))  ; <= fix this
 (define PADDLE-IMAGE empty-image)  ; <= fix this
 
-
+(define (testImage image)
+  (place-image image 100 150 BACKGROUND))
+(testImage FALLER-IMAGE)
 ;
 ;
 ;                                              ;
@@ -257,6 +263,27 @@ increasing *downward*.
 ;                           ;
 ;
 
+
+; Function to move the faller downward on the y-axis
+; "Downward" means increasing the value of the y-coordinate
+; descend : [List-of-Posns] -> [List of Posns]
+(check-expect (descend '()) '())
+(check-expect (descend (list (make-posn 1 1))) (list (make-posn 1 2)))
+(check-expect (descend (list (make-posn 100 100) (make-posn 100 110)
+                             (make-posn 100 120) (make-posn 100 130)))
+                       (list (make-posn 100 101) (make-posn 100 111)
+                             (make-posn 100 121) (make-posn 100 131)))
+(define (descend fallers)
+  (cond
+    [(empty? fallers) '()]
+    [else (cons (make-posn (posn-x (first fallers))
+                           (add1 (posn-y (first fallers))))
+                (descend (rest fallers)))]))
+
+; Increment the position of y value by 1 pixel
+;(define (increment y)
+;  (+ 1 (posn-y y)))
+
 ;; In your `tick` function, you need to
 ;; *sometimes* add a faller to the list of
 ;; fallers. Use a function like `maybe-add-faller`
@@ -276,15 +303,15 @@ increasing *downward*.
 ;
 ; Example:
 (check-expect
-  (<= 4
-      (length
-        (maybe-add-faller
-          (list (make-posn 0 0)
-                (make-posn 1 1)
-                (make-posn 2 2)
-                (make-posn 3 3))))
-      5)
-  #true)
+ (<= 4
+     (length
+      (maybe-add-faller
+       (list (make-posn 0 0)
+             (make-posn 1 1)
+             (make-posn 2 2)
+             (make-posn 3 3))))
+     5)
+ #true)
 
 ; Strategy: decision tree
 (define (maybe-add-faller fallers)
