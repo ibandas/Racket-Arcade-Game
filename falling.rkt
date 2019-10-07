@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname falling) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname falling) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ;
 ;
 ;                                                      ;
@@ -93,9 +93,6 @@ bottom or if it has hit the paddle.
 ; A Direction is one of:
 ; - "left"
 ; - "right"
-; For now: Boolean for left and right
-(define-struct direction [left right])
-
 
 ; A List-of-Posn is one of:
 ; - '()
@@ -175,12 +172,10 @@ added will be included in the commit.
 
 |#
 
-(define FALLER-IMAGE (circle 3 "solid" "red"))  ; <= fix this
-(define PADDLE-IMAGE empty-image)  ; <= fix this
+(define FALLER-IMAGE (circle 10 "solid" "red")) 
+(define PADDLE-IMAGE (rectangle 50 12 "solid" "black")) 
 
-(define (testImage image)
-  (place-image image 100 150 BACKGROUND))
-(testImage FALLER-IMAGE)
+
 ;
 ;
 ;                                              ;
@@ -241,8 +236,163 @@ Don't forget: the coordinate system has the
 origin in the upper-left, with `x` coordinates
 increasing rightward and `y` coordinates
 increasing *downward*.
-
 |#
+
+
+;A Point is:
+; - (make-posn real real)
+
+;A Fallers
+; -'()
+; - (cons point fallers)
+
+;falling: Fallers -> Fallers
+;returns a list of Point by increasing the y coordinates
+
+(define (falling fallers)
+  (cond
+    [(empty? fallers) '()]
+    [else
+     (if (= WORLD-HEIGHT (posn-y (first fallers)))
+         (falling(rest fallers))
+         (cons (make-posn(posn-x(first fallers))(+ 1(posn-y(first fallers))))
+                  (falling(rest fallers))))]))
+                         
+   
+(check-expect (falling '()) '())
+(check-expect (falling (list (make-posn 1 1))) (list (make-posn 1 2)))
+(check-expect (falling (list (make-posn 0 WORLD-HEIGHT) (make-posn 100 0)))
+              (list (make-posn 100 1)))
+(check-expect (falling (list (make-posn 100 100) (make-posn 100 110)
+                             (make-posn 100 120) (make-posn 100 130)))
+              (list (make-posn 100 101) (make-posn 100 111)
+                    (make-posn 100 121) (make-posn 100 131)))
+
+;(define-struct fw (paddle direction fallers score))
+;(make-fw Number Direction List-of-Posn Natural)
+;paddle-moving: Fw -> Number
+;returns the status of paddle
+
+(define (paddle-moving fw-example)
+  (cond
+    [(string=? (fw-direction fw-example) "left") (- (fw-paddle fw-example) 1)]
+    [(string=? (fw-direction fw-example) "right") (+ (fw-paddle fw-example) 1)]))
+
+;tests:
+(check-expect (paddle-moving (make-fw 100 "left" '() 0)) 99)
+(check-expect (paddle-moving (make-fw 100 "right" '() 0)) 101)
+
+
+
+;touch-helper: Point Fw -> Boolean 
+;returns that if the faller touchs the paddle
+(define (touch-helper p num)
+  (cond
+    [(and (<= (abs (- num (posn-x p))) 35)
+          (>= (posn-y p) (- WORLD-HEIGHT 12)))
+     #true]
+    [else #false]))
+;tests:
+(check-expect (touch-helper (make-posn 50 50) 50) #false)
+(check-expect (touch-helper (make-posn 50 (- WORLD-HEIGHT 9)) 50) #true)
+
+;reduce-helper: P -> Boolean
+;returns a boolean based on if the faller touches the bootom of the scene
+(define (reduce-helper p)
+  (cond
+    [(<= (- WORLD-HEIGHT (posn-y p)) 10) #true]
+    [else #false]))
+
+;teste:
+(check-expect (reduce-helper (make-posn 50 50)) #false)
+(check-expect (reduce-helper (make-posn 50 (- WORLD-HEIGHT 5))) #true)
+
+;touch: Fw -> Number
+;returns the scores once the paddle catches the faller and the faller touches the bottom
+;strategy: func. comp.
+(define (touch fw-example)
+  (cond
+    [(empty? (fw-fallers fw-example)) (fw-score fw-example)]
+    [(touch-helper(first (fw-fallers fw-example)) (fw-paddle fw-example))
+     (touch (make-fw (fw-paddle fw-example) (fw-direction fw-example)
+                  (rest(fw-fallers fw-example)) (+ (fw-score fw-example) 10)))]
+    [(equal? (touch-helper(first (fw-fallers fw-example)) (fw-paddle fw-example)) #false)
+     (touch (make-fw (fw-paddle fw-example) (fw-direction fw-example)
+                  (rest(fw-fallers fw-example)) (fw-score fw-example)))]
+    [else
+     (if (and (reduce-helper(first (fw-fallers fw-example))) (equal? (fw-score fw-example) 0)) 0
+         (if (reduce-helper(first (fw-fallers fw-example)))
+             (touch (make-fw (fw-paddle fw-example) (fw-direction fw-example)
+                                    (rest(fw-fallers fw-example)) (- (fw-score fw-example) 1)))
+             (touch (make-fw (fw-paddle fw-example) (fw-direction fw-example)
+                                    (rest(fw-fallers fw-example)) (fw-score fw-example)))))]))
+
+
+;tests
+;not all the tests are working need to come back to fix the function
+
+;(check-expect (touch (make-fw 100 "left" '() 0)) 0)
+;(check-expect (touch (make-fw 50 "left"
+;                              (list (make-posn 50 (- WORLD-HEIGHT 11))(make-posn 60 (- WORLD-HEIGHT 9))
+;                                    (make-posn 120 (- WORLD-HEIGHT 8))(make-posn 110 (- WORLD-HEIGHT 7)))
+;                              0)) 18)
+;(check-expect (touch (make-fw 50 "left"
+;                              (list (make-posn 20 (- WORLD-HEIGHT 6))(make-posn 10 (- WORLD-HEIGHT 20))) 20)) 19)
+;
+;(check-expect (touch (make-fw 50 "left"
+;                              (list (make-posn 20 (- WORLD-HEIGHT 6))(make-posn 10 (- WORLD-HEIGHT 20))) 0)) 0)
+
+
+;falling-update: Fallers Number -> Fallers
+;returns a list of point by delete the points when they get caught by the paddle
+(define (falling-update fallers num)
+  (cond
+    [(empty? fallers) '()]
+    [else
+     (if (touch-helper (first fallers) num)
+         (rest fallers)
+         (cons (first fallers)(falling-update (rest fallers) num)))]))
+
+;tests:
+(check-expect (falling-update(list (make-posn 50 50) (make-posn 60 60)) 50)
+              (list (make-posn 50 50) (make-posn 60 60)))
+
+(check-expect (falling-update(list (make-posn 50 (- WORLD-HEIGHT 10)) (make-posn 50 60)) 50)
+              (list (make-posn 50 60)))
+
+;change-driection: Fw -> string;
+;returns the direction the paddle will be
+(define (change-direction fw-example)
+  (cond
+    [(and (<= (fw-paddle fw-example) 25) (string=? (fw-direction fw-example) "left")) "right"]
+    [(and (>= (fw-paddle fw-example) (- WORLD-WIDTH 25)) (string=? (fw-direction fw-example) "right")) "left"]
+    [else (fw-paddle fw-example)]))
+
+;tests:
+(check-expect (change-direction (make-fw 25 "left" '() 0)) "right")
+
+;key : Faller-world Key-event -> Faller-world
+;builds a key event to control the paddle
+(define (key fw-example a-key)
+  (cond
+    [(key=? a-key "left") (paddle-moving (make-fw "left" (fw-direction fw-example)(fw-direction fw-example)
+                                                         (fw-fallers fw-example)(fw-score fw-example)))]
+    [(key=? a-key "right") (paddle-moving (make-fw "right" (fw-direction fw-example)(fw-direction fw-example)
+                                                         (fw-fallers fw-example)(fw-score fw-example)))]))
+
+;tick : Faller-world -> Faller-world
+(define (tick fw-example)
+  (make-fw (paddle-moving fw-example)
+           (change-direction fw-example)
+           (falling-update (maybe-add-faller (falling(fw-fallers fw-example)))
+                           (fw-paddle fw-example))
+           (touch fw-example)))
+
+;draw: Faller-world -> Scene
+;need to figure out how to finish this draw function
+(define (draw fw-example)
+  ...)
+               
 
 
 ;
@@ -263,37 +413,6 @@ increasing *downward*.
 ;                           ;
 ;
 
-
-; Recursive function to move the faller downward on the y-axis
-; "Downward" means increasing the value of the y-coordinate
-; If the list is empty, it returns empty
-; Else if the faller is at the bottom of the screen
-; It is removed from the new list being created
-; Thus being removed from the world
-;------
-; TODO: Add points to user score if it touches paddle
-; NOTE: Will probably make that another function
-;------
-; Else the faller has one pixel added to the y value
-; To make it descend
-; descend : [List-of-Posns] -> [List of Posns]
-(check-expect (descend '()) '())
-(check-expect (descend (list (make-posn 1 1))) (list (make-posn 1 2)))
-(check-expect (descend (list (make-posn 0 WORLD-HEIGHT) (make-posn 100 0)))
-              (list (make-posn 100 1)))
-(check-expect (descend (list (make-posn 100 100) (make-posn 100 110)
-                             (make-posn 100 120) (make-posn 100 130)))
-              (list (make-posn 100 101) (make-posn 100 111)
-                    (make-posn 100 121) (make-posn 100 131)))
-(define (descend fallers)
-  (cond
-    [(empty? fallers) '()]
-    [else (if (= WORLD-HEIGHT (posn-y (first fallers)))
-              (descend (rest fallers))
-              (cons (make-posn (posn-x (first fallers))
-                           (add1 (posn-y (first fallers))))
-                (descend (rest fallers))))]))
-
 ;; In your `tick` function, you need to
 ;; *sometimes* add a faller to the list of
 ;; fallers. Use a function like `maybe-add-faller`
@@ -313,15 +432,15 @@ increasing *downward*.
 ;
 ; Example:
 (check-expect
- (<= 4
-     (length
-      (maybe-add-faller
-       (list (make-posn 0 0)
-             (make-posn 1 1)
-             (make-posn 2 2)
-             (make-posn 3 3))))
-     5)
- #true)
+  (<= 4
+      (length
+        (maybe-add-faller
+          (list (make-posn 0 0)
+                (make-posn 1 1)
+                (make-posn 2 2)
+                (make-posn 3 3))))
+      5)
+  #true)
 
 ; Strategy: decision tree
 (define (maybe-add-faller fallers)
