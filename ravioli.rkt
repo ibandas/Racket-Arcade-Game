@@ -16,24 +16,24 @@
 (define-struct dish [filling sauce])
 ; Enunmerations - 9 distinct possibilities
 ; 3 combinations using ricotta
-(define DISH1 (make-dish "ricotta" "tomato"))
-(define DISH2 (make-dish "ricotta" "cream"))
-(define DISH3 (make-dish "ricotta" "wild-mushroom"))
+(define RIC-TOM (make-dish "ricotta" "tomato"))
+(define RIC-CRM (make-dish "ricotta" "cream"))
+(define RIC-WILD (make-dish "ricotta" "wild-mushroom"))
 ; 3 combinations using butternut squash
-(define DISH4 (make-dish "butternut-squash" "tomato"))
-(define DISH5 (make-dish "butternut-squash" "cream"))
-(define DISH6 (make-dish "butternut-squash" "wild-mushroom"))
+(define BUT-TOM (make-dish "butternut-squash" "tomato"))
+(define BUT-CRM (make-dish "butternut-squash" "cream"))
+(define BUT-WILD (make-dish "butternut-squash" "wild-mushroom"))
 ; 3 combinations using lobster
-(define DISH7 (make-dish "lobster" "tomato"))
-(define DISH8 (make-dish "lobster" "cream"))
-(define DISH9 (make-dish "lobster" "wild-mushroom"))
+(define LOB-TOM (make-dish "lobster" "tomato"))
+(define LOB-CRM (make-dish "lobster" "cream"))
+(define LOB-WILD (make-dish "lobster" "wild-mushroom"))
 
 
 ; al-pomodoro: Filling -> Dish
 ; Takes in a filling and returns a dish with tomato sauce
-(check-expect (al-pomodoro "ricotta") DISH1)
-(check-expect (al-pomodoro "butternut-squash") DISH4)
-(check-expect (al-pomodoro "lobster") DISH7)
+(check-expect (al-pomodoro "ricotta") RIC-TOM)
+(check-expect (al-pomodoro "butternut-squash") BUT-TOM)
+(check-expect (al-pomodoro "lobster") LOB-TOM)
 ; Strategy: Structural Decomposition
 (define (al-pomodoro filling)
   (make-dish filling "tomato"))
@@ -43,11 +43,11 @@
 ; interp. String will be one of:
 ; 1. IS NOT VEGAN (Combinations involving ricotta, lobster, cream)
 ; 2. IS VEGAN (Everything else)
-(check-expect (is-vegan? DISH1) "IS NOT VEGAN")
-(check-expect (is-vegan? DISH3) "IS NOT VEGAN")
-(check-expect (is-vegan? DISH4) "IS VEGAN")
-(check-expect (is-vegan? DISH5) "IS NOT VEGAN")
-(check-expect (is-vegan? DISH8) "IS NOT VEGAN")
+(check-expect (is-vegan? RIC-TOM) "IS NOT VEGAN")
+(check-expect (is-vegan? RIC-WILD) "IS NOT VEGAN")
+(check-expect (is-vegan? BUT-TOM) "IS VEGAN")
+(check-expect (is-vegan? BUT-CRM) "IS NOT VEGAN")
+(check-expect (is-vegan? LOB-CRM) "IS NOT VEGAN")
 ; Strategy: Structural Decomposition + Function Composition
 (define (is-vegan? dish)
   (cond
@@ -60,13 +60,13 @@
 ; interp. Dish will result in two possibilities:
 ; 1. True -> (make-dish "butternut-squash" "cream")
 ; 2. False -> (make-dish "lobster" "wild-mushroom")
-(check-expect (choose #true) DISH5)
-(check-expect (choose #false) DISH9)
+(check-expect (choose #true) BUT-CRM)
+(check-expect (choose #false) LOB-WILD)
 ; Strategy: Structural Decomposition
 (define (choose dish)
   (cond
-    [dish DISH5]
-    [else DISH9]))
+    [dish BUT-CRM]
+    [else LOB-WILD]))
 
 ;; a List-of-Dishes is:
 ;; - '()
@@ -74,8 +74,9 @@
 ; only-vegan: [List-of-Dishes] -> [List-of-Dishes]
 ; interp. Takes in a list of ravioli dishes
 ; And returns a list of dishes that are vegan
-(define list-of-dishes (list DISH1 DISH2 DISH3 DISH4 DISH5 DISH6 DISH7 DISH8 DISH9))
-(check-expect (only-vegan list-of-dishes) (list DISH4 DISH6))
+(define list-of-dishes (list RIC-TOM RIC-CRM RIC-WILD BUT-TOM
+                             BUT-CRM BUT-WILD LOB-TOM LOB-CRM LOB-WILD))
+(check-expect (only-vegan list-of-dishes) (list BUT-TOM BUT-WILD))
 (check-expect (only-vegan '()) '())
 ; Strategy: Structural Decomposition
 (define (only-vegan dishes)
