@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname ravioli) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname ravioli) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ;; a Dish is:
 ;; (make-dish Filling Sauce)
 
@@ -28,6 +28,8 @@
 (define LOB-CRM (make-dish "lobster" "cream"))
 (define LOB-WILD (make-dish "lobster" "wild-mushroom"))
 
+(define list-of-dishes (list RIC-TOM RIC-CRM RIC-WILD BUT-TOM
+                             BUT-CRM BUT-WILD LOB-TOM LOB-CRM LOB-WILD))
 
 ; al-pomodoro: Filling -> Dish
 ; Takes in a filling and returns a dish with tomato sauce
@@ -39,22 +41,19 @@
   (make-dish filling "tomato"))
 
 
-; is-vegan?: Dish -> String
-; interp. String will be one of:
-; 1. IS NOT VEGAN (Combinations involving ricotta, lobster, cream)
-; 2. IS VEGAN (Everything else)
-(check-expect (is-vegan? RIC-TOM) "IS NOT VEGAN")
-(check-expect (is-vegan? RIC-WILD) "IS NOT VEGAN")
-(check-expect (is-vegan? BUT-TOM) "IS VEGAN")
-(check-expect (is-vegan? BUT-CRM) "IS NOT VEGAN")
-(check-expect (is-vegan? LOB-CRM) "IS NOT VEGAN")
-; Strategy: Structural Decomposition + Function Composition
+; is-vegan?: Dish -> Boolean
+; Asserts the Dish is vegan if it contains
+; Ricotta, Lobster, or Cream
+(check-expect (is-vegan? RIC-TOM) #false)
+(check-expect (is-vegan? RIC-WILD) #false)
+(check-expect (is-vegan? BUT-TOM) #true)
+(check-expect (is-vegan? BUT-CRM) #false)
+(check-expect (is-vegan? LOB-CRM) #false)
+; Strategy: Structural Decomposition
 (define (is-vegan? dish)
-  (cond
-    [(string=? (dish-filling dish) "ricotta") "IS NOT VEGAN"]
-    [(string=? (dish-filling dish) "lobster") "IS NOT VEGAN"]
-    [(string=? (dish-sauce dish) "cream") "IS NOT VEGAN"]
-    [else "IS VEGAN"]))
+  (not (or (string=? (dish-filling dish) "ricotta")
+           (string=? (dish-filling dish) "lobster")
+           (string=? (dish-sauce dish) "cream"))))
 
 ; choose: Boolean -> Dish
 ; interp. Dish will result in two possibilities:
@@ -63,26 +62,23 @@
 (check-expect (choose #true) BUT-CRM)
 (check-expect (choose #false) LOB-WILD)
 ; Strategy: Structural Decomposition
-(define (choose dish)
+(define (choose cod)
   (cond
-    [dish BUT-CRM]
+    [cod BUT-CRM]
     [else LOB-WILD]))
 
 ;; a List-of-Dishes is:
 ;; - '()
 ;; - (cons Dish List-of-Dishes)
-; only-vegan: [List-of-Dishes] -> [List-of-Dishes]
-; interp. Takes in a list of ravioli dishes
-; And returns a list of dishes that are vegan
-(define list-of-dishes (list RIC-TOM RIC-CRM RIC-WILD BUT-TOM
-                             BUT-CRM BUT-WILD LOB-TOM LOB-CRM LOB-WILD))
+
+; only-vegan: List-of-Dishes -> List-of-Dishes
+; Takes in a list of ravioli dishes and returns a list of dishes
+; that are vegan
+
 (check-expect (only-vegan list-of-dishes) (list BUT-TOM BUT-WILD))
 (check-expect (only-vegan '()) '())
-; Strategy: Structural Decomposition
+; Strategy: Function Composition
 (define (only-vegan dishes)
-  (cond
-    [(empty? dishes) '()]
-    [else   (if (string=? "IS VEGAN" (is-vegan? (first dishes)))
-                (cons (first dishes) (only-vegan (rest dishes)))
-                (only-vegan (rest dishes)))]))
+  (filter is-vegan? dishes))
+  
 

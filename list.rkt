@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname list) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname list) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ; squares : [List-of Number] -> [List-of Number]
 ; Squares each number in the list, producing a new list.
 (check-expect (squares '()) '())
@@ -40,7 +40,6 @@
 ; compare-strings: String String -> String
 ; Compares two strings and returns the longest one
 ; Should not pass in two empty strings
-; interp. If two strings are equal, it will just return the second string
 (check-expect (compare-strings "mars" "saturn") "saturn")
 (check-expect (compare-strings "saturn" "neptune") "neptune")
 (check-expect (compare-strings "mercury" "pluto") "mercury")
